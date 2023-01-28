@@ -45,6 +45,6 @@ export async function InstallGuildCommand(appId, guildId, command) {
 // Start command
 export const START_COMMAND = {
   name: 'start',
-  description: 'Start the Minecraft server (if it is not already running)',
+  description: `Start the ${process.env.SERVICE} service (if it is not already running)`,
   type: 1,
 };

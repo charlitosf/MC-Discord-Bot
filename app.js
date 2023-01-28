@@ -40,21 +40,21 @@ app.post('/interactions', async function (req, res) {
 
     // "start" guild command
     if (name === 'start') {
-      // Check if the Minecraft service is already running
+      // Check if the service is already running
       try {
-        await execP('/usr/bin/systemctl status minecraft');
+        await execP(`/usr/bin/systemctl status ${process.env.SERVICE}` );
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: 'Minecraft is already running',
+            content: `${process.env.SERVICE} is already running`,
           },
         });
       } catch (e) { // If not, start it
-        execP('/usr/bin/sudo /usr/bin/systemctl start minecraft');
+        execP(`/usr/bin/sudo /usr/bin/systemctl start ${process.env.SERVICE}`);
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: 'Starting Minecraft',
+            content: `Starting ${process.env.SERVICE}...`,
           },
         });
       }
