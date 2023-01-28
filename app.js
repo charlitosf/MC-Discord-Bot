@@ -38,9 +38,9 @@ app.post('/interactions', async function (req, res) {
   if (type === InteractionType.APPLICATION_COMMAND) {
     const { name } = data;
 
-    // "test" guild command
+    // "start" guild command
     if (name === 'start') {
-      // Send a message into the channel where command was triggered from
+      // Check if the Minecraft service is already running
       try {
         await execP('/usr/bin/systemctl status minecraft');
         return res.send({
@@ -49,7 +49,7 @@ app.post('/interactions', async function (req, res) {
             content: 'Minecraft is already running',
           },
         });
-      } catch (e) {
+      } catch (e) { // If not, start it
         execP('/usr/bin/sudo /usr/bin/systemctl start minecraft');
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
