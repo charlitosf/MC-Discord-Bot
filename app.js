@@ -46,15 +46,15 @@ app.post('/interactions', async function (req, res) {
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: `${process.env.SERVICE} is already running`,
+            content: `${process.env.SERVICE_NAME} is already running`,
           },
         });
       } catch (e) { // If not, start it
-        execP(`/usr/bin/sudo /usr/bin/systemctl start ${process.env.SERVICE}`);
+        execP(`/usr/bin/sudo /usr/bin/systemctl start ${process.env.SERVICE_NAME}`);
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: `Starting ${process.env.SERVICE}...`,
+            content: `Starting ${process.env.SERVICE_NAME}...`,
           },
         });
       }
