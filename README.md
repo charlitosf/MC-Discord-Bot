@@ -5,6 +5,8 @@ This is a NodeJS with Express project of a Discord bot. It features a single com
 ## Project structure
 
 - [app.js](https://github.com/charlitosf/MC-Discord-Bot/blob/main/app.js): Entry-point of the application. It contains the Express code to handle incoming requests and the execution of the command in the current machine.
+- [commands.js](https://github.com/charlitosf/MC-Discord-Bot/blob/main/commands.js): Functions related to the management of the Discord commands.
+- [utils.js](https://github.com/charlitosf/MC-Discord-Bot/blob/main/utils.js): Utility functions related to the Bot-Discord communication.
 
 ## Running app locally
 
