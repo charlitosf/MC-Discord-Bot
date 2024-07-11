@@ -1,18 +1,21 @@
-import 'dotenv/config';
-import express from 'express';
+import "dotenv/config";
+import express from "express";
 import {
   InteractionType,
   InteractionResponseType,
-} from 'discord-interactions';
-import { VerifyDiscordRequest } from './utils.js';
+  MessageComponentTypes,
+} from "discord-interactions";
+import { VerifyDiscordRequest } from "./utils.js";
 import {
   HasGuildCommands,
   START_COMMAND,
-} from './commands.js';
-import util from 'util';
-import { exec } from 'child_process';
+  START_COMMAND_TEST,
+} from "./commands.js";
+import util from "util";
+import { exec } from "child_process";
+import { getWorldsAsOptions } from "./osInteractions.js";
 
-const execP = util.promisify(exec);
+const execAsPromise = util.promisify(exec);
 
 // Create an express app
 const app = express();
@@ -24,7 +27,7 @@ app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
  */
-app.post('/interactions', async function (req, res) {
+app.post("/interactions", async function (req, res) {
   // Interaction type and data
   const { type, id, data } = req.body;
 
@@ -39,18 +42,21 @@ app.post('/interactions', async function (req, res) {
     const { name } = data;
 
     // "start" guild command
-    if (name === 'start') {
+    if (name === "start") {
       // Check if the service is already running
       try {
-        await execP(`/usr/bin/systemctl status ${process.env.SERVICE}` );
+        await execAsPromise(`/usr/bin/systemctl status ${process.env.SERVICE}`);
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
             content: `${process.env.SERVICE_NAME} is already running`,
           },
         });
-      } catch (e) { // If not, start it
-        execP(`/usr/bin/sudo /usr/bin/systemctl start ${process.env.SERVICE_NAME}`);
+      } catch (e) {
+        // If not, start it
+        execAsPromise(
+          `/usr/bin/sudo /usr/bin/systemctl start ${process.env.SERVICE_NAME}`
+        );
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
@@ -59,14 +65,47 @@ app.post('/interactions', async function (req, res) {
         });
       }
     }
+
+    if (name === "start-test") {
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: "Choose the world you want to start:",
+          components: [
+            {
+              type: MessageComponentTypes.ACTION_ROW,
+              components: [
+                {
+                  type: MessageComponentTypes.STRING_SELECT,
+                  custom_id: "world_select",
+                  options: await getWorldsAsOptions(),
+                },
+              ],
+            },
+          ],
+        },
+      });
+    }
+  }
+
+  if (type === InteractionType.MESSAGE_COMPONENT) {
+    const { values: selected_world } = data;
+
+    return res.send({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: {
+        content: `Starting the specific world: ${selected_world}...`,
+      },
+    });
   }
 });
 
 app.listen(PORT, () => {
-  console.log('Listening on port', PORT);
+  console.log("Listening on port", PORT);
 
   // Check if guild commands from commands.json are installed (if not, install them)
   HasGuildCommands(process.env.APP_ID, process.env.GUILD_ID, [
     START_COMMAND,
+    START_COMMAND_TEST,
   ]);
 });
