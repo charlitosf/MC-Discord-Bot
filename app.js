@@ -14,6 +14,7 @@ import {
 import {
   checkServiceStarted,
   getWorldsAsOptions,
+  selectWorld,
   startService,
 } from "./osInteractions.js";
 
@@ -87,12 +88,18 @@ app.post("/interactions", async function (req, res) {
   }
 
   if (type === InteractionType.MESSAGE_COMPONENT) {
-    const { values: selected_world } = data;
+    const { values } = data;
+
+    const BANNED_CHARACTERS_REGEX = /[^a-zA-Z0-9_\.-]/g;
+    const selected_world = values[0].replaceAll(BANNED_CHARACTERS_REGEX, "");
+
+    await selectWorld(selected_world);
+    await startService();
 
     return res.send({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-        content: `Starting the specific world: ${selected_world}...`,
+        content: `Starting world: ${selected_world}...`,
       },
     });
   }
