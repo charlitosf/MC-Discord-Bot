@@ -83,7 +83,6 @@ app.post("/interactions", async function (req, res) {
 
   if (type === InteractionType.MESSAGE_COMPONENT) {
     // Check if the service is already running
-    console.log(e);
     const { values } = data;
 
     const BANNED_CHARACTERS_REGEX = /[^a-zA-Z0-9_\.-]/g;
