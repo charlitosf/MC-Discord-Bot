@@ -11,11 +11,11 @@ import {
   START_COMMAND,
   START_COMMAND_TEST,
 } from "./commands.js";
-import util from "util";
-import { exec } from "child_process";
-import { getWorldsAsOptions } from "./osInteractions.js";
-
-const execAsPromise = util.promisify(exec);
+import {
+  checkServiceStarted,
+  getWorldsAsOptions,
+  startService,
+} from "./osInteractions.js";
 
 // Create an express app
 const app = express();
@@ -45,7 +45,7 @@ app.post("/interactions", async function (req, res) {
     if (name === "start") {
       // Check if the service is already running
       try {
-        await execAsPromise(`/usr/bin/systemctl status ${process.env.SERVICE}`);
+        await checkServiceStarted();
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
@@ -54,9 +54,7 @@ app.post("/interactions", async function (req, res) {
         });
       } catch (e) {
         // If not, start it
-        execAsPromise(
-          `/usr/bin/sudo /usr/bin/systemctl start ${process.env.SERVICE_NAME}`
-        );
+        await startService();
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {

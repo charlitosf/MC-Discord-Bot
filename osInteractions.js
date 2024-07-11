@@ -21,3 +21,13 @@ export async function getWorldsAsOptions() {
     };
   });
 }
+
+export async function checkServiceStarted() {
+  await execAsPromise(`/usr/bin/systemctl status ${process.env.SERVICE}`);
+}
+
+export async function startService() {
+  await execAsPromise(
+    `/usr/bin/sudo /usr/bin/systemctl start ${process.env.SERVICE_NAME}`
+  );
+}
