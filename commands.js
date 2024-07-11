@@ -43,14 +43,14 @@ export async function InstallGuildCommand(appId, guildId, command) {
 }
 
 // Start command
-export const START_COMMAND = {
-  name: "start",
-  description: `Start the ${process.env.SERVICE} service (if it is not already running)`,
+export const STOP_COMMAND = {
+  name: "stop",
+  description: `Stop the ${process.env.SERVICE} service (if it is running)`,
   type: 1,
 };
 
-export const START_COMMAND_TEST = {
-  name: "start-test",
-  description: "Start the test service",
+export const START_COMMAND = {
+  name: "start",
+  description: `Start the ${process.env.SERVICE} service (if it is not already running)`,
   type: 1,
 };

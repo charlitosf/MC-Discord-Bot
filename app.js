@@ -6,16 +6,13 @@ import {
   MessageComponentTypes,
 } from "discord-interactions";
 import { VerifyDiscordRequest } from "./utils.js";
-import {
-  HasGuildCommands,
-  START_COMMAND,
-  START_COMMAND_TEST,
-} from "./commands.js";
+import { HasGuildCommands, STOP_COMMAND, START_COMMAND } from "./commands.js";
 import {
   checkServiceStarted,
   getWorldsAsOptions,
   selectWorld,
   startService,
+  stopService,
 } from "./osInteractions.js";
 
 // Create an express app
@@ -42,9 +39,17 @@ app.post("/interactions", async function (req, res) {
   if (type === InteractionType.APPLICATION_COMMAND) {
     const { name } = data;
 
-    // "start" guild command
-    if (name === "start") {
-      // Check if the service is already running
+    if (name === STOP_COMMAND.name) {
+      await stopService();
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: `Stopping ${process.env.SERVICE_NAME}...`,
+        },
+      });
+    }
+
+    if (name === START_COMMAND.name) {
       try {
         await checkServiceStarted();
         return res.send({
@@ -54,40 +59,31 @@ app.post("/interactions", async function (req, res) {
           },
         });
       } catch (e) {
-        // If not, start it
-        await startService();
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: `Starting ${process.env.SERVICE_NAME}...`,
+            content: "Choose the world you want to start:",
+            components: [
+              {
+                type: MessageComponentTypes.ACTION_ROW,
+                components: [
+                  {
+                    type: MessageComponentTypes.STRING_SELECT,
+                    custom_id: "world_select",
+                    options: await getWorldsAsOptions(),
+                  },
+                ],
+              },
+            ],
           },
         });
       }
     }
-
-    if (name === "start-test") {
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: "Choose the world you want to start:",
-          components: [
-            {
-              type: MessageComponentTypes.ACTION_ROW,
-              components: [
-                {
-                  type: MessageComponentTypes.STRING_SELECT,
-                  custom_id: "world_select",
-                  options: await getWorldsAsOptions(),
-                },
-              ],
-            },
-          ],
-        },
-      });
-    }
   }
 
   if (type === InteractionType.MESSAGE_COMPONENT) {
+    // Check if the service is already running
+    console.log(e);
     const { values } = data;
 
     const BANNED_CHARACTERS_REGEX = /[^a-zA-Z0-9_\.-]/g;
@@ -111,6 +107,6 @@ app.listen(PORT, () => {
   // Check if guild commands from commands.json are installed (if not, install them)
   HasGuildCommands(process.env.APP_ID, process.env.GUILD_ID, [
     START_COMMAND,
-    START_COMMAND_TEST,
+    STOP_COMMAND,
   ]);
 });

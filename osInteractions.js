@@ -31,11 +31,17 @@ export async function selectWorld(worldName) {
 }
 
 export async function checkServiceStarted() {
-  await execAsPromise(`/usr/bin/systemctl status ${process.env.SERVICE}`);
+  await execAsPromise(`/usr/bin/systemctl status ${process.env.SERVICE_NAME}`);
 }
 
 export async function startService() {
   await execAsPromise(
     `/usr/bin/sudo /usr/bin/systemctl start ${process.env.SERVICE_NAME}`
+  );
+}
+
+export async function stopService() {
+  await execAsPromise(
+    `/usr/bin/sudo /usr/bin/systemctl stop ${process.env.SERVICE_NAME}`
   );
 }
