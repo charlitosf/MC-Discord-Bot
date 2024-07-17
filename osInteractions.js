@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import util from "util";
 import fs from "node:fs/promises";
+import { getReleaseUrl } from "./version_manager.js";
 
 const execAsPromise = util.promisify(exec);
 
@@ -44,4 +45,40 @@ export async function stopService() {
   await execAsPromise(
     `/usr/bin/sudo /usr/bin/systemctl stop ${process.env.SERVICE_NAME}`
   );
+}
+
+export async function createServerFromTemplate(
+  templateName,
+  serverName,
+  versionId
+) {
+  const { url, version } = await getReleaseUrl(versionId);
+  await createServer(templateName, serverName, url);
+  return version;
+}
+
+async function createServer(templateName, serverName, serverUrl) {
+  await execAsPromise(
+    `cp -r ${process.env.TEMPLATES_DIRECTORY}${templateName} ${process.env.WORKING_DIRECOTORY}${serverName}`
+  );
+  downloadWorld(serverName, serverUrl);
+}
+
+function downloadWorld(serverName, url) {
+  execAsPromise(
+    `wget -O ${process.env.WORKING_DIRECOTORY}${serverName}/server.jar ${url}`
+  );
+}
+
+export async function getTemplateNamesAsOptions() {
+  const output = await execAsPromise(`ls ${process.env.TEMPLATES_DIRECTORY}`);
+  return output.stdout
+    .trim()
+    .split("\n")
+    .map((dir) => {
+      return {
+        label: dir,
+        value: dir,
+      };
+    });
 }

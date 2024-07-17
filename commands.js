@@ -54,3 +54,23 @@ export const START_COMMAND = {
   description: `Start the ${process.env.SERVICE_NAME} service (if it is not already running)`,
   type: 1,
 };
+
+export const CREATE_COMMAND = {
+  name: "create",
+  description: `Create an instance of the ${process.env.SERVICE_NAME} service`,
+  type: 1,
+  options: [
+    {
+      name: "server_name",
+      description: "The name of the server you want to create",
+      type: 3,
+      required: true,
+    },
+    {
+      name: "version",
+      description:
+        "The version of the server you want to create. The latest by default",
+      type: 3,
+    },
+  ],
+};
